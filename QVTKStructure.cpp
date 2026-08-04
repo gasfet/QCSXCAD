@@ -711,12 +711,15 @@ void QVTKStructure::RenderDiscMaterialModel()
 		CSPropDiscMaterial* dm_prop = prop->ToDiscMaterial();
 		if (dm_prop)
 		{
+			vtkPolyData* polydata = dm_prop->CreatePolyDataModel();
+			if (polydata==NULL)
+				continue;
+
 			VTKDiscModel model;
 			VTKPrimitives* vtkPrims= new VTKPrimitives(ren);
 			model.vtk_model = vtkPrims;
 			model.uID = dm_prop->GetUniqueID();
 			m_DiscMatModels.append(model);
-			vtkPolyData* polydata = dm_prop->CreatePolyDataModel();
 
 			double rgb[3] = {1,1,1};
 			CSTransform* transform = new CSTransform(dm_prop->GetTransform());
@@ -726,6 +729,7 @@ void QVTKStructure::RenderDiscMaterialModel()
 			if (transform)
 				transform_matrix = transform->GetMatrix();
 			vtkPrims->AddPolyData(polydata,rgb,1.0,transform_matrix);
+			polydata->Delete();	// ownership has been passed to the vtk pipeline
 			delete transform;
 		}
 	}
